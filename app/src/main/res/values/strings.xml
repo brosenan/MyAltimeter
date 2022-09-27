@@ -6,6 +6,6 @@
     -->
     <string name="hello_world">Hello Square World!</string>
     <string name="the_local_time">The local time</string>
-    <string name="_0m">0m</string>
+    <string name="_0m">Waiting for GPS</string>
     <string name="_0m_s">0m/s</string>
 </resources>
