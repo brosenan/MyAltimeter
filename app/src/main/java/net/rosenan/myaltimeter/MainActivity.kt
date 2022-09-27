@@ -6,6 +6,8 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.widget.TextView
 import net.rosenan.myaltimeter.databinding.ActivityMainBinding
+import net.rosenan.timeseries.BoxCar
+import net.rosenan.timeseries.Derivative
 import net.rosenan.timeseries.avionics.Altitude
 import net.rosenan.timeseries.bindTextView
 import net.rosenan.timeseries.sensors.LocationTimeSeries
@@ -13,6 +15,7 @@ import net.rosenan.timeseries.sensors.SensorTimeSeries
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
+import kotlin.math.roundToInt
 
 class MainActivity : Activity() {
 
@@ -27,13 +30,17 @@ class MainActivity : Activity() {
         setContentView(binding.root)
 
         pressure = SensorTimeSeries(this, Sensor.TYPE_PRESSURE, SensorManager.SENSOR_DELAY_NORMAL)
-        val verticalVelocityView = findViewById<TextView>(R.id.verticalVelocity)
-        bindTextView(pressure.map { values -> "${values[0]} hPa" }, verticalVelocityView)
-
         location = LocationTimeSeries(this, 30000)
+        val altitude = Altitude(pressure, location)
+        val verticalVelocity = Derivative(BoxCar(altitude, 3000))
+
         val altitudeView = findViewById<TextView>(R.id.altitude)
-        bindTextView(Altitude(pressure, location).map { altitude -> round(altitude).toInt() }
+        bindTextView(altitude.map { altitude -> round(altitude).toInt() }
             .map { altitude -> "${altitude}m" }, altitudeView)
+
+        val verticalVelocityView = findViewById<TextView>(R.id.verticalVelocity)
+        bindTextView(verticalVelocity.map { vs -> (vs * 10.0).roundToInt() / 10.0 }
+            .map { vs -> "${vs}m/s" }, verticalVelocityView)
 
         val timeView = findViewById<TextView>(R.id.timeView)
         bindTextView(
